@@ -1,29 +1,42 @@
 import unittest
 
-from htmlnode import HTLMNode
+from htmlnode import HTMLNode, LeafNode
 
 
 class TestTextNode(unittest.TestCase):
-    PROPS = {
-    "href": "https://www.google.com",
-    "target": "_blank",
-}
-    def test_1(self):
-        node = HTLMNode("p", "text inside paragraph", [], self.PROPS)
-        with self.assertRaises(NotImplementedError):
-            node.to_html()
-    
-    def test_2(self):
-        child_node = HTLMNode(None, "text inside paragraph",)
-        parent_node = HTLMNode("p", None, [child_node], self.PROPS)
-        print(parent_node)
-        self.assertTrue(True)
-    
-    def test_3(self):
-        node = HTLMNode("p", None, None, self.PROPS)
-        print(node.props_to_html())
-        self.assertTrue(True)
+    def test_repr(self):
+        node = HTMLNode(
+            "p",
+            "What a strange world",
+            None,
+            {"class": "primary"},
+        )
+        self.assertEqual(
+            node.__repr__(),
+            "HTMLNode(tag=p, value=What a strange world, children=None, props={'class': 'primary'})",
+        )
 
+    def test_leaf_to_html(self):
+        node = LeafNode("p", "Hello, world!")
+        self.assertEqual(node.to_html(), "<p>Hello, world!</p>")
+
+        node = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+        self.assertEqual(node.to_html(), '<a href="https://www.google.com">Click me!</a>')
+        self.assertEqual(node.props_to_html(), ' href="https://www.google.com"')
+
+        node = LeafNode(None, "raw text")
+        self.assertEqual(node.to_html(), "raw text")
+
+    def test_leaf_errors(self):
+        with self.assertRaises(TypeError):
+            LeafNode("a")
+
+        with self.assertRaises(ValueError):
+            LeafNode("a", None).to_html()
+
+    def test_isinstance(self):
+        node = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+        self.assertIsInstance(node.props, dict)
 
 if __name__ == "__main__":
     unittest.main()
