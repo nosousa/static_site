@@ -13,15 +13,27 @@ def markdown_to_blocks(markdown):
     return [block for block in blocks if block]
 
 def block_to_block_type(block):
+    lines = block.split("\n")
+
     if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         return BlockType.heading
-    elif block.startswith("```\n") and block.endswith("\n```"):
+    if len(lines) > 1 and lines[0] == "```" and lines[-1] == "```":
         return BlockType.code
-    elif all(line.startswith(">") for line in block.split("\n")):
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return BlockType.paragraph
         return BlockType.quote
-    elif all(line.startswith("- ") for line in block.split("\n")):
+    if block.startswith("- "):
+        for line in lines:
+            if not line.startswith("- "):
+                return BlockType.paragraph
         return BlockType.unordered_list
-    elif all(line.startswith(f"{i + 1}. ") for i, line in enumerate(block.split("\n"))):
+    if block.startswith("1. "):
+        i = 1
+        for line in lines:
+            if not line.startswith(f"{i}. "):
+                return BlockType.paragraph
+            i += 1
         return BlockType.ordered_list
-    else:
-        return BlockType.paragraph
+    return BlockType.paragraph
