@@ -1,7 +1,6 @@
-from textnode import TextNode, TextType
+from copy_static import copy_static
 
 def main():
-    my_text_node = TextNode("dummy text", TextType.PLAIN)
-    print(my_text_node)
+    copy_static()
 
 main()
