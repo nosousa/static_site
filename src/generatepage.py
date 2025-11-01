@@ -3,7 +3,7 @@ from md_to_html import markdown_to_html_node
 from extracttitle import extract_title
 from pathlib import Path
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     
     with open(from_path, 'r') as f:
@@ -15,6 +15,8 @@ def generate_page(from_path, template_path, dest_path):
     html_string = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
     html_page = template.replace(r"{{ Title }}", title).replace(r"{{ Content }}", html_string)
+    html_page = html_page.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
+
 
     if not os.path.exists(os.path.dirname(dest_path)):
         os.makedirs(os.path.dirname(dest_path))
@@ -23,11 +25,11 @@ def generate_page(from_path, template_path, dest_path):
         f.write(html_page)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     for filename in os.listdir(dir_path_content):
         src_path = os.path.join(dir_path_content, filename)
         dst_path = os.path.join(dest_dir_path, filename)
         if os.path.isdir(src_path):
-            generate_pages_recursive(src_path, template_path, dst_path)
+            generate_pages_recursive(src_path, template_path, dst_path, basepath)
         elif os.path.isfile(src_path) and filename.endswith(".md"):
-            generate_page(src_path, template_path, Path(dst_path).with_suffix(".html"))
+            generate_page(src_path, template_path, Path(dst_path).with_suffix(".html"), basepath)
